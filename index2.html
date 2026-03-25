@@ -172,15 +172,13 @@ main{
   border:4px solid transparent;border-top-color:var(--border2)}
 .cell:hover .cell-tooltip{display:block}
 
-/* ── Min/Max pip — colored dot in top-right corner, debounced ── */
-.cell-pip{
-  position:absolute;top:5px;right:5px;
-  width:7px;height:7px;border-radius:50%;
-  opacity:0;transition:opacity .3s;
-  pointer-events:none;
-}
-.cell.is-max .cell-pip{opacity:1;background:#00ff88;box-shadow:0 0 5px #00ff8899}
-.cell.is-min .cell-pip{opacity:1;background:#ffcc00;box-shadow:0 0 5px #ffcc0099}
+/* ── Min/Max cell highlight ── */
+.cell.is-max{border-color:rgba(0,212,255,.5)!important;box-shadow:0 0 10px rgba(0,212,255,.15)!important}
+.cell.is-min{border-color:rgba(255,204,0,.5)!important;box-shadow:0 0 10px rgba(255,204,0,.12)!important}
+.cell-badge{font-family:var(--mono);font-size:.42rem;letter-spacing:1px;
+  padding:1px 3px;border-radius:1px;line-height:1.4;display:none}
+.cell.is-max .cell-badge{display:inline;background:rgba(0,212,255,.15);color:#00d4ff}
+.cell.is-min .cell-badge{display:inline;background:rgba(255,204,0,.12);color:#ffcc00}
 
 /* ── Bottom: Serial log (full width) ── */
 .log-panel{grid-column:1/-1;grid-row:2}
@@ -550,11 +548,6 @@ function exportCsv() {
 // ── Cell card cache ────────────────────────────────────────────────────────
 let cellCardKeys = [];
 
-// ── Min/Max debounce state ─────────────────────────────────────────────────
-let _prevMaxKey = null, _prevMinKey = null;
-let _maxStable  = 0,   _minStable  = 0;
-let _committedMax = null, _committedMin = null;
-
 function buildCellGrid(keys) {
   const grid = document.getElementById('cell-grid');
   grid.innerHTML = '';
@@ -564,9 +557,11 @@ function buildCellGrid(keys) {
     el.className = 'cell';
     el.id = `cell-${k}`;
     el.innerHTML = `
-      <div class="cell-pip" id="cpip-${k}"></div>
       <div class="cell-tooltip" id="ctt-${k}">C${String(k).padStart(2,'0')} · — mV</div>
-      <div class="cell-num">C${String(k).padStart(2,'0')}</div>
+      <div style="display:flex;align-items:center;gap:3px">
+        <div class="cell-num">C${String(k).padStart(2,'0')}</div>
+        <div class="cell-badge" id="cbadge-${k}">MAX</div>
+      </div>
       <div class="cell-bar-wrap"><div class="cell-bar" id="cb-${k}"></div></div>
       <div class="cell-mv" id="cv-${k}">—</div>`;
     grid.appendChild(el);
@@ -683,7 +678,7 @@ function update(d) {
     buildCellGrid(keys);
   }
 
-  // Find min/max cell numbers for highlighting (debounced — must be stable for 5 frames)
+  // Find min/max cell numbers for highlighting
   let minKey = null, maxKey = null;
   if (d.cell_min_mv != null && d.cell_max_mv != null) {
     keys.forEach(k => {
@@ -692,14 +687,6 @@ function update(d) {
       if (mv === d.cell_min_mv) minKey = k;
     });
   }
-  // Debounce: only commit if same cell wins N frames in a row
-  const DEBOUNCE = 5;
-  if (maxKey === _prevMaxKey) { _maxStable++; } else { _maxStable = 0; _prevMaxKey = maxKey; }
-  if (minKey === _prevMinKey) { _minStable++; } else { _minStable = 0; _prevMinKey = minKey; }
-  const stableMax = _maxStable >= DEBOUNCE ? maxKey : _committedMax;
-  const stableMin = _minStable >= DEBOUNCE ? minKey : _committedMin;
-  if (_maxStable >= DEBOUNCE) _committedMax = maxKey;
-  if (_minStable >= DEBOUNCE) _committedMin = minKey;
 
   keys.forEach(k => {
     const info = cells[k];
@@ -708,6 +695,7 @@ function update(d) {
     const vEl  = document.getElementById(`cv-${k}`);
     const bEl  = document.getElementById(`cb-${k}`);
     const tEl  = document.getElementById(`ctt-${k}`);
+    const badgeEl = document.getElementById(`cbadge-${k}`);
     const card = document.getElementById(`cell-${k}`);
 
     if (vEl) { vEl.textContent = mv + ' mV'; vEl.style.color = cellColor(mv); }
@@ -716,15 +704,13 @@ function update(d) {
       bEl.style.background = cellBarColor(mv);
       bEl.style.boxShadow  = `0 0 5px ${cellBarColor(mv)}55`;
     }
-    if (tEl) {
-      const tag = k === stableMax ? ' · ▲ MAX' : k === stableMin ? ' · ▼ MIN' : '';
-      tEl.textContent = `C${String(k).padStart(2,'0')} · ${mv} mV · ${status}${tag}`;
-    }
+    if (tEl) tEl.textContent = `C${String(k).padStart(2,'0')} · ${mv} mV · ${status}`;
 
     if (card) {
       card.classList.remove('is-min','is-max');
-      if      (k === stableMax) card.classList.add('is-max');
-      else if (k === stableMin) card.classList.add('is-min');
+      if (k === maxKey) { card.classList.add('is-max'); if(badgeEl){badgeEl.textContent='MAX';badgeEl.style.display='inline';} }
+      else if (k === minKey) { card.classList.add('is-min'); if(badgeEl){badgeEl.textContent='MIN';badgeEl.style.display='inline';} }
+      else { if(badgeEl) badgeEl.style.display='none'; }
     }
   });
 
