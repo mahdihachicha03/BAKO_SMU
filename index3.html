@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>BAKO Diagnostics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
@@ -13,10 +13,10 @@
   --border:#0f1214;--border2:#1e3045;
   --accent:#9bc8b2;--accent2:#0099bb;
   --green:#00ff88;--yellow:#ffcc00;--orange:#ff7722;--red:#d52943;
-  --blue:#29b6f6;--purple:#9c6fde;
   --dim:#2a4560;--dim2:#cbe09c;--text:#dde5eb;
-  --mono:'Share Tech Mono',monospace;
-  --ui:'Exo 2',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --ui:'DM Sans',sans-serif;
+  font-size:15px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
@@ -55,7 +55,7 @@ main{
   position:relative;z-index:1;
   flex:1;min-height:0;
   display:grid;
-  grid-template-columns:300px 1fr 220px 220px;
+  grid-template-columns:300px 1fr 220px;
   grid-template-rows:1fr 200px;
   gap:10px;padding:10px;
 }
@@ -69,8 +69,8 @@ main{
   flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
   padding:7px 12px 6px;border-bottom:1px solid var(--border);
 }
-.card-title{font-family:var(--ui);font-weight:600;font-size:.65rem;
-  letter-spacing:3px;text-transform:uppercase;color:var(--dim2)}
+.card-title{font-family:var(--ui);font-weight:700;font-size:.78rem;
+  letter-spacing:2px;text-transform:uppercase;color:var(--dim2)}
 .card-body{flex:1;min-height:0;overflow:hidden;padding:10px 12px}
 
 /* ── Left column: SOC + pack stats ── */
@@ -90,9 +90,9 @@ main{
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;
   background:var(--border);margin:4px -12px -10px}
 .stat{background:var(--card);padding:8px 12px;display:flex;flex-direction:column;gap:2px}
-.stat-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
-.stat-val{font-family:var(--ui);font-weight:700;font-size:1.2rem;color:var(--text)}
-.stat-unit{font-family:var(--mono);font-size:.6rem;color:var(--dim2);margin-left:2px}
+.stat-lbl{font-family:var(--mono);font-size:.65rem;letter-spacing:1px;color:var(--dim2);text-transform:uppercase}
+.stat-val{font-family:var(--ui);font-weight:700;font-size:1.35rem;color:var(--text)}
+.stat-unit{font-family:var(--mono);font-size:.7rem;color:var(--dim2);margin-left:2px}
 .g{color:var(--green)!important}.y{color:var(--yellow)!important}
 .o{color:var(--orange)!important}.r{color:var(--red)!important}
 .d{color:var(--dim2)!important}
@@ -103,14 +103,14 @@ main{
 .cell-summary{display:flex;gap:16px;flex-wrap:wrap;
   padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .cs{display:flex;flex-direction:column;gap:1px}
-.cs-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;color:var(--dim2);text-transform:uppercase}
-.cs-val{font-family:var(--ui);font-weight:700;font-size:.95rem}
+.cs-lbl{font-family:var(--mono);font-size:.62rem;letter-spacing:1px;color:var(--dim2);text-transform:uppercase}
+.cs-val{font-family:var(--ui);font-weight:700;font-size:1.05rem}
 
 .cell-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(58px,1fr));
   gap:5px;overflow-y:auto;
-  height:calc(100% - 56px);
+  height:calc(100% - 90px);
   padding-right:4px;
 }
 .cell-grid::-webkit-scrollbar{width:3px}
@@ -122,83 +122,72 @@ main{
   cursor:default;transition:border-color .25s,box-shadow .25s;
 }
 .cell:hover{border-color:var(--accent);box-shadow:0 0 8px rgba(0,212,255,.12)}
-.cell-num{font-family:var(--mono);font-size:.5rem;color:var(--dim2)}
+.cell-num{font-family:var(--mono);font-size:.6rem;color:var(--dim2)}
 .cell-bar-wrap{width:100%;height:28px;display:flex;align-items:flex-end}
 .cell-bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;
   transition:height .5s ease,background .3s}
-.cell-mv{font-family:var(--ui);font-weight:700;font-size:.78rem;
+.cell-mv{font-family:var(--ui);font-weight:700;font-size:.85rem;
   transition:color .3s;white-space:nowrap}
 
-/* ── Right column: BMS Temps ── */
+/* ── Right column: Temps ── */
 .right{grid-column:3;grid-row:1}
 
-.temp-list{display:flex;flex-direction:column;gap:12px;height:100%;overflow-y:auto}
+.temp-list{display:flex;flex-direction:column;gap:12px;overflow-y:auto}
 .temp-row{display:flex;flex-direction:column;gap:4px}
 .temp-hdr{display:flex;justify-content:space-between;align-items:baseline}
-.temp-name{font-family:var(--mono);font-size:.62rem;color:var(--dim2)}
-.temp-val{font-family:var(--ui);font-weight:700;font-size:1.05rem}
-.temp-track{height:3px;background:var(--border2);border-radius:2px}
-.temp-fill{height:3px;border-radius:2px;transition:width .6s ease}
-.temp-avg{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);
+.temp-name{font-family:var(--mono);font-size:.72rem;color:var(--dim2)}
+.temp-val{font-family:var(--ui);font-weight:700;font-size:1.2rem}
+.temp-track{height:5px;background:var(--border2);border-radius:2px}
+.temp-fill{height:5px;border-radius:2px;transition:width .6s ease}
+.temp-avg{padding-top:10px;border-top:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center}
 .temp-avg-lbl{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;color:var(--dim2)}
 .temp-avg-val{font-family:var(--ui);font-weight:700;font-size:1.05rem}
 
-/* ── Far-right: Extra sensors ── */
-.ext-panel{grid-column:4;grid-row:1;overflow:hidden}
+/* ── Temperature Legend ── */
+.temp-legend{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.legend-title{font-family:var(--mono);font-size:.5rem;letter-spacing:2px;color:var(--dim2);
+  text-transform:uppercase;margin-bottom:6px}
+.legend-items{display:flex;flex-direction:column;gap:3px}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.55rem;color:var(--dim2)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-range{margin-left:auto;opacity:.7}
 
-.ext-body{
-  flex:1;min-height:0;overflow-y:auto;
-  display:flex;flex-direction:column;gap:8px;
-  padding:8px 12px;
+/* ── Cell voltage legend (horizontal in summary bar) ── */
+.cell-legend{display:flex;gap:10px;flex-wrap:wrap;padding-top:6px;
+  border-top:1px solid var(--border);margin-top:2px}
+.cl-item{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:.5rem;color:var(--dim2)}
+.cl-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ── Cell tooltip ── */
+.cell{position:relative}
+.cell-tooltip{
+  display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:#0d1e2e;border:1px solid var(--border2);border-radius:3px;
+  padding:5px 8px;font-family:var(--mono);font-size:.58rem;color:var(--text);
+  white-space:nowrap;z-index:50;pointer-events:none;
+  box-shadow:0 4px 12px rgba(0,0,0,.5);
 }
-.ext-body::-webkit-scrollbar{width:3px}
-.ext-body::-webkit-scrollbar-thumb{background:var(--border2)}
+.cell-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--border2)}
+.cell:hover .cell-tooltip{display:block}
 
-/* Section divider inside ext panel */
-.ext-section{font-family:var(--mono);font-size:.52rem;letter-spacing:3px;
-  text-transform:uppercase;color:var(--dim);padding:4px 0 2px;
-  border-bottom:1px solid var(--border);}
-
-/* Voltage row */
-.ext-row{display:flex;flex-direction:column;gap:3px}
-.ext-label{font-family:var(--mono);font-size:.58rem;color:var(--dim2)}
-.ext-value{font-family:var(--ui);font-weight:700;font-size:1.1rem;color:var(--text)}
-.ext-unit{font-family:var(--mono);font-size:.58rem;color:var(--dim2);margin-left:3px}
-.ext-bar-wrap{height:3px;background:var(--border2);border-radius:2px}
-.ext-bar{height:3px;border-radius:2px;transition:width .5s ease,background .3s}
-
-/* Handbrake badge */
-.hb-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  font-family:var(--mono);font-size:.75rem;font-weight:600;
-  padding:4px 10px;border-radius:2px;border:1px solid;
-  transition:all .3s;
+/* ── Min/Max pip — colored dot in top-right corner, debounced ── */
+.cell-pip{
+  position:absolute;top:5px;right:5px;
+  width:7px;height:7px;border-radius:50%;
+  opacity:0;transition:opacity .3s;
+  pointer-events:none;
 }
-.hb-badge.engaged{color:var(--red);border-color:var(--red);background:rgba(213,41,67,.12)}
-.hb-badge.released{color:var(--green);border-color:var(--green);background:rgba(0,255,136,.08)}
-.hb-badge.unknown{color:var(--dim2);border-color:var(--dim);background:transparent}
-
-/* Oil level gauge */
-.oil-wrap{display:flex;flex-direction:column;gap:4px}
-.oil-bar-outer{height:10px;background:var(--border2);border-radius:5px;overflow:hidden}
-.oil-bar-inner{height:100%;border-radius:5px;transition:width .6s ease,background .3s}
-.oil-label-row{display:flex;justify-content:space-between;align-items:baseline}
-
-/* Current meter (two channels) */
-.current-dual{display:flex;gap:8px}
-.current-ch{flex:1;display:flex;flex-direction:column;gap:3px}
-.current-arc{position:relative;height:36px;display:flex;align-items:center;justify-content:center}
-.current-bg{height:5px;background:var(--border2);border-radius:3px;width:100%}
-.current-fill{position:absolute;left:0;top:50%;transform:translateY(-50%);
-  height:5px;border-radius:3px;transition:width .5s ease}
+.cell.is-max .cell-pip{opacity:1;background:#00ff88;box-shadow:0 0 5px #00ff8899}
+.cell.is-min .cell-pip{opacity:1;background:#ffcc00;box-shadow:0 0 5px #ffcc0099}
 
 /* ── Bottom: Serial log (full width) ── */
 .log-panel{grid-column:1/-1;grid-row:2}
 
 .log-body{
   flex:1;min-height:0;
-  font-family:var(--mono);font-size:.65rem;line-height:1.65;
+  font-family:var(--mono);font-size:.75rem;line-height:1.65;
   color:var(--dim2);overflow-y:scroll;padding:6px 12px;
 }
 .log-body::-webkit-scrollbar{width:3px}
@@ -208,15 +197,20 @@ main{
 .log-line.frame{color:#2a6080}
 .log-line.new{color:var(--accent);animation:logFade 2s forwards}
 .log-line.info{color:var(--dim2)}
-.log-line.sensor{color:#7e9e6c}
 .log-line.error{color:var(--red)}
 @keyframes logFade{0%{color:var(--accent)}100%{color:#2a6080}}
 
 /* ── Export buttons ── */
 .exp-btn {
-  font-family: var(--mono);font-size: 0.8rem;padding: 7px 13px;
-  background: transparent;border: 1px solid var(--border2);color: var(--dim2);
-  border-radius: 2px;cursor: pointer;transition: all 0.2s;
+  font-family: var(--mono);
+  font-size: 0.8rem;  /* bigger text */
+  padding: 7px 13px;  /* bigger button */
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--dim2);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 .exp-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.06)}
 .exp-btn-csv:hover{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.06)}
@@ -318,6 +312,14 @@ main{
         <div class="cs"><span class="cs-lbl">Avg</span><span class="cs-val" id="c-avg">—</span></div>
         <div class="cs"><span class="cs-lbl">Bal Threshold</span><span class="cs-val" style="color:var(--dim2)">3300 mV</span></div>
       </div>
+      <div class="cell-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:#ff2244"></div>OV ≥3750</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#00ff88"></div>Full ≥3650</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#00cc66"></div>Good ≥3300</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#4488aa"></div>Normal ≥3200</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#ffcc00"></div>Low ≥2500</div>
+        <div class="cl-item"><div class="cl-dot" style="background:#ff2244"></div>UV &lt;2500</div>
+      </div>
       <div class="cell-grid" id="cell-grid">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--dim2);padding:20px 0;grid-column:1/-1;text-align:center">
           Waiting for cell voltage frames…
@@ -326,96 +328,40 @@ main{
     </div>
   </div>
 
-  <!-- Right: BMS Temps -->
+  <!-- Right: Temps -->
   <div class="card right">
-    <div class="card-hdr"><span class="card-title">BMS Temps</span></div>
-    <div class="card-body">
-      <div class="temp-list" id="temp-list">
+    <div class="card-hdr"><span class="card-title">Temperatures</span></div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:0">
+      <div class="temp-list" id="temp-list" style="flex:1;min-height:0">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--dim2);padding:20px 0;text-align:center">
           Waiting…
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Far-right: Extra Sensors -->
-  <div class="card ext-panel">
-    <div class="card-hdr"><span class="card-title">Ext Sensors</span></div>
-    <div class="ext-body">
-
-      <!-- DC Voltage -->
-      <div class="ext-section">DC Voltage</div>
-
-      <div class="ext-row">
-        <div class="ext-label">HV ISO  <span style="color:var(--dim);font-size:.5rem">MOD1150-3</span></div>
-        <div><span class="ext-value" id="hv-iso-val">—</span><span class="ext-unit">V</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="hv-iso-bar"></div></div>
-      </div>
-
-      <div class="ext-row">
-        <div class="ext-label">12 V AUX  <span style="color:var(--dim);font-size:.5rem">C11A063</span></div>
-        <div><span class="ext-value" id="aux12-val">—</span><span class="ext-unit">V</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="aux12-bar"></div></div>
-      </div>
-
-      <!-- MPPT Current -->
-      <div class="ext-section">MPPT Current</div>
-
-      <div class="ext-row">
-        <div class="ext-label">CH1  <span style="color:var(--dim);font-size:.5rem">ACS712-5A</span></div>
-        <div><span class="ext-value" id="mppt-i1-val">—</span><span class="ext-unit">A</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="mppt-i1-bar"></div></div>
-      </div>
-
-      <div class="ext-row">
-        <div class="ext-label">CH2  <span style="color:var(--dim);font-size:.5rem">ACS712-5A</span></div>
-        <div><span class="ext-value" id="mppt-i2-val">—</span><span class="ext-unit">A</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="mppt-i2-bar"></div></div>
-      </div>
-
-      <!-- Ext Temperatures -->
-      <div class="ext-section">Temperatures</div>
-
-      <div class="ext-row">
-        <div class="ext-label">Bat Surface 1  <span style="color:var(--dim);font-size:.5rem">DS18B20</span></div>
-        <div><span class="ext-value" id="bat-t1-val">—</span><span class="ext-unit">°C</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="bat-t1-bar"></div></div>
-      </div>
-
-      <div class="ext-row">
-        <div class="ext-label">Bat Surface 2  <span style="color:var(--dim);font-size:.5rem">DS18B20</span></div>
-        <div><span class="ext-value" id="bat-t2-val">—</span><span class="ext-unit">°C</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="bat-t2-bar"></div></div>
-      </div>
-
-      <div class="ext-row">
-        <div class="ext-label">MPPT Heatsink  <span style="color:var(--dim);font-size:.5rem">NTC 10K</span></div>
-        <div><span class="ext-value" id="mppt-t-val">—</span><span class="ext-unit">°C</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="mppt-t-bar"></div></div>
-      </div>
-
-      <div class="ext-row">
-        <div class="ext-label">DC-DC Heatsink  <span style="color:var(--dim);font-size:.5rem">NTC 10K</span></div>
-        <div><span class="ext-value" id="dcdc-t-val">—</span><span class="ext-unit">°C</span></div>
-        <div class="ext-bar-wrap"><div class="ext-bar" id="dcdc-t-bar"></div></div>
-      </div>
-
-      <!-- Logic / Status -->
-      <div class="ext-section">Status</div>
-
-      <div class="ext-row">
-        <div class="ext-label">Handbrake  <span style="color:var(--dim);font-size:.5rem">LJ12A3-4-Z/BX</span></div>
-        <div id="hb-badge" class="hb-badge unknown">⬤ UNKNOWN</div>
-      </div>
-
-      <div class="ext-row" style="margin-top:4px">
-        <div class="oil-label-row">
-          <div class="ext-label">Oil Level</div>
-          <span class="ext-value" id="oil-val" style="font-size:.9rem">—<span class="ext-unit">%</span></span>
+      <div class="temp-legend">
+        <div class="legend-title">Temp Legend</div>
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#29b6f6"></div>
+            <span>Cold</span><span class="legend-range">&lt; 0°C</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#4dd0e1"></div>
+            <span>Cool</span><span class="legend-range">0–15°C</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#00ff88"></div>
+            <span>Normal</span><span class="legend-range">15–35°C</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#ffcc00"></div>
+            <span>Warm</span><span class="legend-range">35–45°C</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#d52943"></div>
+            <span>Hot</span><span class="legend-range">&gt; 45°C</span>
+          </div>
         </div>
-        <div class="oil-bar-outer"><div class="oil-bar-inner" id="oil-bar"></div></div>
       </div>
-
     </div>
   </div>
 
@@ -447,12 +393,12 @@ function cellColor(mv) {
   return 'var(--red)';
 }
 function cellBarColor(mv) {
-  if (mv >= THRESH.cell_ov)   return '#ff2244';
-  if (mv >= THRESH.cell_full) return '#00d4ff';
-  if (mv >= THRESH.cell_bal)  return '#00ff88';
-  if (mv >= THRESH.cell_nom)  return '#4488aa';
-  if (mv >= THRESH.cell_uv)   return '#ffcc00';
-  return '#ff2244';
+  if (mv >= THRESH.cell_ov)   return '#ff2244';   // overvoltage → red
+  if (mv >= THRESH.cell_full) return '#00ff88';   // full → bright green (was blue/cyan)
+  if (mv >= THRESH.cell_bal)  return '#00cc66';   // good → mid green
+  if (mv >= THRESH.cell_nom)  return '#4488aa';   // normal → dim blue-grey
+  if (mv >= THRESH.cell_uv)   return '#ffcc00';   // low → yellow
+  return '#ff2244';                               // undervoltage → red
 }
 function cellBarPct(mv) {
   return Math.max(4, Math.min(100, ((mv - 2400) / (3700 - 2400)) * 100));
@@ -467,35 +413,11 @@ function tempColor(t) {
   if (t <= 45) return 'var(--yellow)';
   return 'var(--red)';
 }
-function hsTempColor(t) {
-  if (t < 40)  return 'var(--green)';
-  if (t < 60)  return 'var(--yellow)';
-  if (t < 80)  return 'var(--orange)';
-  return 'var(--red)';
-}
-function currentColor(a, max) {
-  const r = a / max;
-  if (r < 0.6) return 'var(--green)';
-  if (r < 0.85) return 'var(--yellow)';
-  return 'var(--red)';
-}
-function auxVColor(v) {
-  if (v === null) return 'var(--dim2)';
-  if (v < 11.5)  return 'var(--red)';
-  if (v > 14.5)  return 'var(--orange)';
-  if (v < 11.8)  return 'var(--yellow)';
-  return 'var(--green)';
-}
-function oilColor(pct) {
-  if (pct < 15) return 'var(--red)';
-  if (pct < 30) return 'var(--yellow)';
-  return 'var(--green)';
-}
 function fmt(v, d=1) { return (v != null) ? Number(v).toFixed(d) : '—'; }
 
-// ── Full log buffer ────────────────────────────────────────────────────────
-let allLogLines  = [];
-let lastLogHash  = '';
+// ── Full log buffer (all lines ever received, for export) ─────────────────
+let allLogLines  = [];   // every raw line, never trimmed
+let lastLogHash  = '';   // detect actual new content
 
 // ── Export helpers ─────────────────────────────────────────────────────────
 function downloadFile(filename, content, mime) {
@@ -520,20 +442,14 @@ function exportCsv() {
   const u16le = (b,o) => parseInt(b[o],16) | (parseInt(b[o+1],16)<<8);
   const u16be = (b,o) => (parseInt(b[o],16)<<8) | parseInt(b[o+1],16);
 
-  const cells   = [];
-  const pack    = [];
-  const soc     = [];
-  const minmax  = [];
-  const temps   = [];
-  const sensors = [];  // extra sensor lines
+  // Buckets per sheet
+  const cells   = [];   // one row per frame (4 cells each)
+  const pack    = [];   // 0x98FF28F4
+  const soc     = [];   // 0x98FFE5F4
+  const minmax  = [];   // 0x98FE28F4
+  const temps   = [];   // 0x98B428F4
 
   allLogLines.forEach(line => {
-    // Extra sensor lines
-    if (line.startsWith('SENSOR:')) {
-      const m = /^SENSOR:(\w+)=(.+)$/.exec(line);
-      if (m) sensors.push({ 'Key': m[1], 'Value': parseFloat(m[2]) });
-      return;
-    }
     const m = re.exec(line);
     if (!m) return;
     const ts   = parseInt(m[1]);
@@ -555,7 +471,8 @@ function exportCsv() {
     }
     else if (func === 0xB4) {
       temps.push({
-        'Timestamp (ms)': ts, 'Frame ID': id,
+        'Timestamp (ms)': ts,
+        'Frame ID':       id,
         'Sensor 1 (C)':  parseInt(b[0],16) - 40,
         'Sensor 2 (C)':  parseInt(b[1],16) - 40,
         'Sensor 3 (C)':  parseInt(b[2],16) - 40,
@@ -563,14 +480,16 @@ function exportCsv() {
     }
     else if (func === 0xFF && sub === 0xE5) {
       soc.push({
-        'Timestamp (ms)':       ts, 'Frame ID': id,
+        'Timestamp (ms)':       ts,
+        'Frame ID':             id,
         'SOC (%)':              u16le(b,0) / 10,
         'Charge Request (A)':   u16le(b,2) / 10,
       });
     }
     else if (func === 0xFF && sub === 0x28) {
       pack.push({
-        'Timestamp (ms)':        ts, 'Frame ID': id,
+        'Timestamp (ms)':        ts,
+        'Frame ID':              id,
         'Pack Voltage (V)':      u16le(b,0) / 100,
         'Disch Limit (A)':       u16le(b,2) / 100,
         'SOC (%)':               u16le(b,4) / 10,
@@ -578,7 +497,8 @@ function exportCsv() {
     }
     else if (func === 0xFE && sub === 0x28) {
       minmax.push({
-        'Timestamp (ms)':   ts, 'Frame ID': id,
+        'Timestamp (ms)':   ts,
+        'Frame ID':         id,
         'Max Cell (mV)':    u16le(b,0),
         'Min Cell (mV)':    u16le(b,2),
         'Spread (mV)':      u16le(b,0) - u16le(b,2),
@@ -589,24 +509,27 @@ function exportCsv() {
     }
   });
 
+  // Build workbook using SheetJS
   const XLSX = window.XLSX;
   const wb   = XLSX.utils.book_new();
 
   function addSheet(data, name) {
     if (!data.length) return;
     const ws = XLSX.utils.json_to_sheet(data);
+    // Auto column widths
     const cols = Object.keys(data[0]).map(k => ({ wch: Math.max(k.length, 12) }));
     ws['!cols'] = cols;
     XLSX.utils.book_append_sheet(wb, ws, name);
   }
 
-  addSheet(pack,    'Pack Summary');
-  addSheet(soc,     'SOC & Charge');
-  addSheet(minmax,  'Min-Max Cells');
-  addSheet(temps,   'Temperatures');
-  addSheet(sensors, 'Ext Sensors');
+  addSheet(pack,   'Pack Summary');
+  addSheet(soc,    'SOC & Charge');
+  addSheet(minmax, 'Min-Max Cells');
+  addSheet(temps,  'Temperatures');
 
+  // Cell voltages: pivot so each row = one timestamp, columns = all 19 cells
   if (cells.length) {
+    // Merge rows with same timestamp (groups of up to 5 frames per cycle)
     const merged = {};
     cells.forEach(row => {
       const ts = row['Timestamp (ms)'];
@@ -627,6 +550,11 @@ function exportCsv() {
 // ── Cell card cache ────────────────────────────────────────────────────────
 let cellCardKeys = [];
 
+// ── Min/Max debounce state ─────────────────────────────────────────────────
+let _prevMaxKey = null, _prevMinKey = null;
+let _maxStable  = 0,   _minStable  = 0;
+let _committedMax = null, _committedMin = null;
+
 function buildCellGrid(keys) {
   const grid = document.getElementById('cell-grid');
   grid.innerHTML = '';
@@ -636,6 +564,8 @@ function buildCellGrid(keys) {
     el.className = 'cell';
     el.id = `cell-${k}`;
     el.innerHTML = `
+      <div class="cell-pip" id="cpip-${k}"></div>
+      <div class="cell-tooltip" id="ctt-${k}">C${String(k).padStart(2,'0')} · — mV</div>
       <div class="cell-num">C${String(k).padStart(2,'0')}</div>
       <div class="cell-bar-wrap"><div class="cell-bar" id="cb-${k}"></div></div>
       <div class="cell-mv" id="cv-${k}">—</div>`;
@@ -646,11 +576,20 @@ function buildCellGrid(keys) {
 // ── Serial log ─────────────────────────────────────────────────────────────
 function updateLog(lines) {
   if (!lines || !lines.length) return;
+
+  // Detect if anything actually changed by comparing last line content
   const hash = lines[lines.length - 1] + lines.length;
   if (hash === lastLogHash) return;
   lastLogHash = hash;
 
   const box = document.getElementById('log-body');
+
+  // Find truly new lines: anything in `lines` not yet in allLogLines
+  // Server sends last 40 lines — we append only what we haven't stored yet
+  const prevLen  = allLogLines.length;
+  const overlap  = lines.filter(l => !allLogLines.includes(l));
+
+  // More reliable: use the last known line as anchor
   let newLines;
   if (allLogLines.length === 0) {
     newLines = lines;
@@ -659,124 +598,32 @@ function updateLog(lines) {
     const idx = lines.lastIndexOf(lastKnown);
     newLines = (idx >= 0) ? lines.slice(idx + 1) : lines;
   }
+
   if (!newLines.length) return;
 
+  // Append to full buffer
   allLogLines.push(...newLines);
+
+  // Update line counter
   document.getElementById('log-count').textContent = allLogLines.length + ' lines';
 
+  // Render new lines into DOM
   newLines.forEach(line => {
     const el = document.createElement('div');
     el.className = 'log-line';
-    if (line.startsWith('[INFO]'))          el.classList.add('info');
-    else if (line.startsWith('[ERR]'))      el.classList.add('error');
-    else if (line.startsWith('SENSOR:'))  { el.classList.add('sensor'); }
-    else if (line.includes('ID: 0x'))     {
-      el.classList.add('frame'); el.classList.add('new');
-      setTimeout(() => el.classList.remove('new'), 2100);
-    }
-    else                                    el.classList.add('info');
+    if      (line.startsWith('[INFO]'))    el.classList.add('info');
+    else if (line.startsWith('[ERR]'))     el.classList.add('error');
+    else if (line.includes('ID: 0x'))   { el.classList.add('frame'); el.classList.add('new');
+      setTimeout(() => el.classList.remove('new'), 2100); }
+    else                                   el.classList.add('info');
     el.textContent = line;
     box.appendChild(el);
   });
 
+  // Keep DOM to last 150 lines (allLogLines keeps everything for export)
   while (box.children.length > 150) box.removeChild(box.firstChild);
+  // Use requestAnimationFrame so scroll happens after paint
   requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
-}
-
-// ── Extra sensor bar helper ────────────────────────────────────────────────
-function setExtBar(id, pct, color) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.style.width     = Math.max(0, Math.min(100, pct)) + '%';
-  el.style.background = color;
-  el.style.boxShadow  = `0 0 5px ${color}55`;
-}
-
-// ── Extra sensors update ───────────────────────────────────────────────────
-function updateExt(ext, thr) {
-  if (!ext) return;
-
-  // HV Isolation voltage
-  if (ext.hv_iso_v !== null && ext.hv_iso_v !== undefined) {
-    const v   = ext.hv_iso_v;
-    const pct = Math.min(100, (v / 80) * 100);
-    const col = (v < 40) ? 'var(--red)' : (v < 55) ? 'var(--yellow)' : 'var(--green)';
-    document.getElementById('hv-iso-val').textContent = v.toFixed(2);
-    document.getElementById('hv-iso-val').style.color = col;
-    setExtBar('hv-iso-bar', pct, col);
-  }
-
-  // 12 V AUX
-  if (ext.aux12v !== null && ext.aux12v !== undefined) {
-    const v   = ext.aux12v;
-    const col = auxVColor(v);
-    const pct = Math.min(100, (v / 16) * 100);
-    document.getElementById('aux12-val').textContent = v.toFixed(2);
-    document.getElementById('aux12-val').style.color = col;
-    setExtBar('aux12-bar', pct, col);
-  }
-
-  // MPPT currents
-  const maxA = (thr && thr.mppt_max_a) || 5.0;
-  ['mppt_i1', 'mppt_i2'].forEach((key, idx) => {
-    const val = ext[key];
-    if (val !== null && val !== undefined) {
-      const col = currentColor(val, maxA);
-      const pct = Math.min(100, (val / maxA) * 100);
-      document.getElementById(`mppt-i${idx+1}-val`).textContent = val.toFixed(2);
-      document.getElementById(`mppt-i${idx+1}-val`).style.color = col;
-      setExtBar(`mppt-i${idx+1}-bar`, pct, col);
-    }
-  });
-
-  // Battery surface temps (DS18B20)
-  ['bat_t1', 'bat_t2'].forEach((key, idx) => {
-    const val = ext[key];
-    if (val !== null && val !== undefined) {
-      const col = hsTempColor(val);   // reuse heatsink colour scale
-      const pct = Math.max(4, Math.min(100, ((val + 10) / 70) * 100));
-      document.getElementById(`bat-t${idx+1}-val`).textContent =
-        (val >= 0 ? '+' : '') + val.toFixed(1);
-      document.getElementById(`bat-t${idx+1}-val`).style.color = col;
-      setExtBar(`bat-t${idx+1}-bar`, pct, col);
-    }
-  });
-
-  // Heatsink temps (NTC)
-  [['mppt_t', 'mppt-t'], ['dcdc_t', 'dcdc-t']].forEach(([key, pfx]) => {
-    const val = ext[key];
-    if (val !== null && val !== undefined) {
-      const col = hsTempColor(val);
-      const pct = Math.max(4, Math.min(100, (val / 100) * 100));
-      document.getElementById(`${pfx}-val`).textContent =
-        (val >= 0 ? '+' : '') + val.toFixed(1);
-      document.getElementById(`${pfx}-val`).style.color = col;
-      setExtBar(`${pfx}-bar`, pct, col);
-    }
-  });
-
-  // Handbrake
-  const hb = document.getElementById('hb-badge');
-  if (ext.handbrake !== null && ext.handbrake !== undefined) {
-    if (ext.handbrake === 1) {
-      hb.className = 'hb-badge engaged';
-      hb.textContent = '⬤ ENGAGED';
-    } else {
-      hb.className = 'hb-badge released';
-      hb.textContent = '⬤ RELEASED';
-    }
-  }
-
-  // Oil level
-  if (ext.oil_level !== null && ext.oil_level !== undefined) {
-    const pct = Math.max(0, Math.min(100, ext.oil_level));
-    const col = oilColor(pct);
-    document.getElementById('oil-val').innerHTML =
-      `${pct.toFixed(0)}<span class="ext-unit">%</span>`;
-    const bar = document.getElementById('oil-bar');
-    bar.style.width      = pct + '%';
-    bar.style.background = col;
-  }
 }
 
 // ── Main update ────────────────────────────────────────────────────────────
@@ -835,24 +682,58 @@ function update(d) {
   if (keys.length && JSON.stringify(keys) !== JSON.stringify(cellCardKeys)) {
     buildCellGrid(keys);
   }
+
+  // Find min/max cell numbers for highlighting (debounced — must be stable for 5 frames)
+  let minKey = null, maxKey = null;
+  if (d.cell_min_mv != null && d.cell_max_mv != null) {
+    keys.forEach(k => {
+      const mv = cells[k].mv;
+      if (mv === d.cell_max_mv) maxKey = k;
+      if (mv === d.cell_min_mv) minKey = k;
+    });
+  }
+  // Debounce: only commit if same cell wins N frames in a row
+  const DEBOUNCE = 5;
+  if (maxKey === _prevMaxKey) { _maxStable++; } else { _maxStable = 0; _prevMaxKey = maxKey; }
+  if (minKey === _prevMinKey) { _minStable++; } else { _minStable = 0; _prevMinKey = minKey; }
+  const stableMax = _maxStable >= DEBOUNCE ? maxKey : _committedMax;
+  const stableMin = _minStable >= DEBOUNCE ? minKey : _committedMin;
+  if (_maxStable >= DEBOUNCE) _committedMax = maxKey;
+  if (_minStable >= DEBOUNCE) _committedMin = minKey;
+
   keys.forEach(k => {
     const info = cells[k];
     const mv   = info.mv;
+    const status = info.status || '';
     const vEl  = document.getElementById(`cv-${k}`);
     const bEl  = document.getElementById(`cb-${k}`);
+    const tEl  = document.getElementById(`ctt-${k}`);
+    const card = document.getElementById(`cell-${k}`);
+
     if (vEl) { vEl.textContent = mv + ' mV'; vEl.style.color = cellColor(mv); }
     if (bEl) {
       bEl.style.height     = cellBarPct(mv) + '%';
       bEl.style.background = cellBarColor(mv);
       bEl.style.boxShadow  = `0 0 5px ${cellBarColor(mv)}55`;
     }
+    if (tEl) {
+      const tag = k === stableMax ? ' · ▲ MAX' : k === stableMin ? ' · ▼ MIN' : '';
+      tEl.textContent = `C${String(k).padStart(2,'0')} · ${mv} mV · ${status}${tag}`;
+    }
+
+    if (card) {
+      card.classList.remove('is-min','is-max');
+      if      (k === stableMax) card.classList.add('is-max');
+      else if (k === stableMin) card.classList.add('is-min');
+    }
   });
 
-  // BMS Temperatures
+  // Temperatures
   const temps = d.temps || {};
   const tKeys = Object.keys(temps).map(Number).sort((a,b) => a-b);
   if (tKeys.length) {
     const tl = document.getElementById('temp-list');
+    // Update existing rows or rebuild
     const existing = tl.querySelectorAll('.temp-row');
     if (existing.length !== tKeys.length) {
       tl.innerHTML = '';
@@ -891,9 +772,6 @@ function update(d) {
       avgEl.style.color = tempColor(d.avg_temp);
     }
   }
-
-  // Extra sensors
-  updateExt(d.ext, d.ext_thresh);
 
   // Serial log
   if (d.log) updateLog(d.log);

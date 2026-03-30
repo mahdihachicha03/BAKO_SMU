@@ -16,6 +16,23 @@ Usage:
     python server.py --port /dev/ttyUSB0
     python server.py --baud 115200        # default
     python server.py --web-port 8765      # default
+
+─────────────────────────────────────────────────────────────────
+Extra Sensor Serial Protocol (ESP32 → PC)
+─────────────────────────────────────────
+Alongside CAN frames the ESP32 sends simple key=value lines:
+
+  SENSOR:hv_iso_v=58.34        MOD1150-3  isolation module voltage (V)
+  SENSOR:aux12v=12.41          C11A063    12 V auxiliary bus voltage (V)
+  SENSOR:mppt_i1=3.12          ACS712 #1  MPPT current channel 1 (A)
+  SENSOR:mppt_i2=2.87          ACS712 #2  MPPT current channel 2 (A)
+  SENSOR:bat_t1=28.5           DS18B20 #1 battery surface temp (°C)
+  SENSOR:bat_t2=29.1           DS18B20 #2 battery surface temp (°C)
+  SENSOR:mppt_t=42.3           NTC #1     MPPT heatsink temp (°C)
+  SENSOR:dcdc_t=38.7           NTC #2     DC-DC heatsink temp (°C)
+  SENSOR:handbrake=1           LJ12A3     handbrake engaged(1)/released(0)
+  SENSOR:oil_level=75          (TBD)      oil level 0-100 %
+─────────────────────────────────────────────────────────────────
 """
 
 import re, sys, time, asyncio, argparse, threading
@@ -38,19 +55,14 @@ except ImportError:
 
 # ─────────────────────────────────────────────────────────────────────────────
 # O'CELL Frame Decoder
-#
-# Frame ID: 0x98_FUNC_SUB_F4  (29-bit extended)
-#
-# 0x98C8–CC28F4  Cell voltages 1-19   BE uint16, mV
-# 0x98B428F4     Temperatures         byte − 40 = °C
-# 0x98FFE5F4     SOC + chg current    LE uint16 ×10
-# 0x98FF28F4     Pack V / disch lim / SOC   LE uint16
-# 0x98FE28F4     Min/Max cell + disch lim   LE uint16
 # ─────────────────────────────────────────────────────────────────────────────
 
 FRAME_RE = re.compile(
     r'\[(\d+)ms\]\s+ID:\s+(0x[0-9A-Fa-f]+)\s+DLC:\s+(\d+)\s+Data:\s+([0-9A-Fa-f\s]+)'
 )
+
+# SENSOR:key=value  — extra GPIO/ADC sensors from ESP32
+SENSOR_RE = re.compile(r'^SENSOR:(\w+)=(.+)$')
 
 def parse_line(line):
     m = FRAME_RE.search(line)
@@ -63,6 +75,7 @@ def u16le(d, o): return d[o] | (d[o+1] << 8)
 
 
 class BMSState:
+    # ── CAN / BMS constants ──────────────────────────────────────────────────
     CELL_OV       = 3750
     CELL_UV       = 2500
     CELL_FULL     = 3650
@@ -76,8 +89,21 @@ class BMSState:
     MAX_DISCH_A   = 50.0
     NUM_CELLS     = 19
 
+    # ── Extra-sensor limits (for UI colour coding) ───────────────────────────
+    HV_ISO_NOM    = 60.80   # V  — nominal HV isolation sense voltage
+    AUX12_NOM     = 12.0    # V  — target 12 V aux
+    AUX12_LOW     = 11.5    # V  — low warning
+    AUX12_HIGH    = 14.5    # V  — high warning
+    MPPT_MAX_A    = 5.0     # A  — ACS712-5A full-scale
+    BAT_SURF_WARN = 40.0    # °C — battery surface warn
+    BAT_SURF_ERR  = 55.0    # °C — battery surface error
+    HS_WARN       = 60.0    # °C — heatsink warning
+    HS_ERR        = 80.0    # °C — heatsink error
+
     def __init__(self):
         self.lock         = threading.Lock()
+
+        # ── CAN / BMS state ──────────────────────────────────────────────────
         self.cell_mv      = {}
         self.temp_c       = {}
         self.pack_v       = None
@@ -87,12 +113,27 @@ class BMSState:
         self.disch_i_lim  = None
         self.cell_max_mv  = None
         self.cell_min_mv  = None
+
+        # ── Extra sensor state ────────────────────────────────────────────────
+        self.hv_iso_v     = None   # MOD1150-3  isolation module HV voltage (V)
+        self.aux12v       = None   # C11A063    12 V auxiliary bus (V)
+        self.mppt_i1      = None   # ACS712 #1  MPPT current ch1 (A)
+        self.mppt_i2      = None   # ACS712 #2  MPPT current ch2 (A)
+        self.bat_t1       = None   # DS18B20 #1 battery surface temp (°C)
+        self.bat_t2       = None   # DS18B20 #2 battery surface temp (°C)
+        self.mppt_t       = None   # NTC #1  MPPT heatsink temp (°C)
+        self.dcdc_t       = None   # NTC #2  DC-DC heatsink temp (°C)
+        self.handbrake    = None   # 1 = engaged, 0 = released
+        self.oil_level    = None   # 0-100 %
+
+        # ── Housekeeping ──────────────────────────────────────────────────────
         self.frame_count  = 0
         self.connected    = False
         self.port_name    = ""
         self.last_update  = None
         self.raw_log      = deque(maxlen=300)
 
+    # ── CAN frame decoder ─────────────────────────────────────────────────────
     def decode(self, ts, can_id, dlc, data):
         func = (can_id >> 16) & 0xFF
         sub  = (can_id >>  8) & 0xFF
@@ -135,6 +176,25 @@ class BMSState:
                         self.temp_c[i + 1] = float(raw) - 40.0
                 self.disch_i_lim = u16le(data, 6) / 10.0
 
+    # ── Extra sensor decoder ──────────────────────────────────────────────────
+    def decode_sensor(self, key: str, raw_val: str):
+        """Parse a SENSOR:key=value line and update the matching attribute."""
+        try:
+            val = float(raw_val)
+        except ValueError:
+            return
+        known = {
+            "hv_iso_v", "aux12v",
+            "mppt_i1", "mppt_i2",
+            "bat_t1", "bat_t2",
+            "mppt_t", "dcdc_t",
+            "handbrake", "oil_level",
+        }
+        if key in known:
+            with self.lock:
+                self.last_update = datetime.now()
+                setattr(self, key, val)
+
     def cell_status(self, mv):
         if mv >= self.CELL_OV:      return "overvoltage"
         if mv >= self.CELL_FULL:    return "full"
@@ -148,17 +208,21 @@ class BMSState:
             cv   = dict(self.cell_mv)
             temp = dict(self.temp_c)
             soc  = self.soc_ffe5 if self.soc_ffe5 is not None else self.soc
+
+            def r(v, d=2): return round(v, d) if v is not None else None
+
             cells_out = {str(k): {"mv": cv[k], "status": self.cell_status(cv[k])}
                          for k in sorted(cv)}
             return {
+                # ── standard BMS fields ──────────────────────────────────────
                 "connected":      self.connected,
                 "port":           self.port_name,
                 "frame_count":    self.frame_count,
                 "timestamp":      self.last_update.isoformat() if self.last_update else None,
-                "soc":            round(soc, 1)               if soc              is not None else None,
-                "pack_v":         round(self.pack_v, 2)        if self.pack_v      is not None else None,
-                "chg_i_req":      round(self.chg_i_req, 1)     if self.chg_i_req   is not None else None,
-                "disch_i_lim":    round(self.disch_i_lim, 1)   if self.disch_i_lim is not None else None,
+                "soc":            r(soc, 1),
+                "pack_v":         r(self.pack_v, 2),
+                "chg_i_req":      r(self.chg_i_req, 1),
+                "disch_i_lim":    r(self.disch_i_lim, 1),
                 "cells":          cells_out,
                 "cell_count":     len(cv),
                 "cell_max_mv":    self.cell_max_mv,
@@ -179,6 +243,31 @@ class BMSState:
                     "max_dch_a":  self.MAX_DISCH_A,
                 },
                 "log": list(self.raw_log)[-80:],
+
+                # ── extra sensors ────────────────────────────────────────────
+                "ext": {
+                    "hv_iso_v":  r(self.hv_iso_v),
+                    "aux12v":    r(self.aux12v),
+                    "mppt_i1":   r(self.mppt_i1),
+                    "mppt_i2":   r(self.mppt_i2),
+                    "bat_t1":    r(self.bat_t1, 1),
+                    "bat_t2":    r(self.bat_t2, 1),
+                    "mppt_t":    r(self.mppt_t, 1),
+                    "dcdc_t":    r(self.dcdc_t, 1),
+                    "handbrake": int(self.handbrake) if self.handbrake is not None else None,
+                    "oil_level": r(self.oil_level, 0),
+                },
+                "ext_thresh": {
+                    "hv_iso_nom":    self.HV_ISO_NOM,
+                    "aux12_nom":     self.AUX12_NOM,
+                    "aux12_low":     self.AUX12_LOW,
+                    "aux12_high":    self.AUX12_HIGH,
+                    "mppt_max_a":    self.MPPT_MAX_A,
+                    "bat_surf_warn": self.BAT_SURF_WARN,
+                    "bat_surf_err":  self.BAT_SURF_ERR,
+                    "hs_warn":       self.HS_WARN,
+                    "hs_err":        self.HS_ERR,
+                },
             }
 
 
@@ -202,33 +291,17 @@ def millis() -> int:
 
 
 def normalize_line(line: str) -> str:
-    """
-    Normalize any CAN log line into the standard format the parser expects:
-      [Nms] ID: 0x1FFFFFFF DLC: 8 Data: AA BB CC DD EE FF 00 11
-
-    Handles two variants:
-      A — ESP32 logger (already correct):
-            [1849ms] ID: 0x98C828F4 DLC: 8 Data: 0C DE 0C E1 ...
-      B — other CAN tools (needs fixing):
-            Extended ID: 0x18FE28F4  DLC: 8  Data: 0x43 0x0D 0x34 ...
-    """
-    # Already in correct format
     if line.startswith("[") and "ID:" in line and "Data:" in line:
         return line
-
-    # Variant B: strip "Extended " prefix
     line = line.replace("Extended ID:", "ID:").replace("extended ID:", "ID:")
-
     if "ID:" in line and "Data:" in line:
         head, data_part = line.split("Data:", 1)
-        # Remove 0x prefix from each byte in the data section only
         clean_bytes = " ".join(
             tok.replace("0x", "").replace("0X", "")
             for tok in data_part.split()
             if tok.strip()
         )
         return f"[{millis()}ms] {head.strip()} Data: {clean_bytes}"
-
     return line
 
 
@@ -246,11 +319,21 @@ def serial_reader(port, baud, state, stop):
                     line = raw.decode("utf-8", errors="replace").strip()
                     if not line:
                         continue
+
+                    # ── Extra sensor line? ────────────────────────────────────
+                    m = SENSOR_RE.match(line)
+                    if m:
+                        state.raw_log.append(line)
+                        state.decode_sensor(m.group(1), m.group(2).strip())
+                        continue
+
+                    # ── CAN frame line ────────────────────────────────────────
                     line = normalize_line(line)
                     state.raw_log.append(line)
                     result = parse_line(line)
                     if result:
                         state.decode(*result)
+
         except serial.SerialException as e:
             state.connected = False
             state.raw_log.append(f"[ERR] {e}")
