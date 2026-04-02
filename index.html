@@ -398,7 +398,8 @@
 
     .cell-bar-wrap {
       width: 100%;
-      height: 28px;
+      flex: 1;
+      min-height: 60px;
       display: flex;
       align-items: flex-end
     }
@@ -741,13 +742,72 @@
     .exp-btn:hover {
       border-color: var(--accent);
       color: var(--accent);
-      background: rgba(0, 212, 255, .06)
+      background: rgba(0, 212, 255, .06);
     }
 
     .exp-btn-csv:hover {
       border-color: var(--green);
       color: var(--green);
-      background: rgba(0, 255, 136, .06)
+      background: rgba(0, 255, 136, .06);
+    }
+
+    /* ── Info Icons & Tooltips ── */
+    .info-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .info-icon {
+      font-size: 14px;
+      cursor: help;
+      filter: grayscale(1) opacity(0.7);
+      transition: all 0.2s;
+    }
+
+    .info-wrap:hover .info-icon {
+      filter: none opacity(1);
+    }
+
+    .legend-tooltip {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 8px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 10px;
+      width: max-content;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    .info-wrap:hover .legend-tooltip {
+      opacity: 1;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text);
+    }
+
+    .legend-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
     }
 
     /* ── Overlay ── */
@@ -1023,7 +1083,20 @@
     <div class="card center">
       <div class="card-hdr">
         <span class="card-title">Cell Voltages</span>
-        <span id="cell-summary-hdr" style="font-family:var(--mono);font-size:.6rem;color:var(--dim2)"></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="cell-summary-hdr" style="font-family:var(--mono);font-size:.6rem;color:var(--dim2)"></span>
+          <div class="info-wrap">
+            <span class="info-icon">ℹ️</span>
+            <div class="legend-tooltip">
+              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &ge; 3.75V (Overvoltage)</div>
+              <div class="legend-row"><div class="legend-color" style="background: #00d4ff"></div> &ge; 3.65V (Full)</div>
+              <div class="legend-row"><div class="legend-color" style="background: #00ff88"></div> &ge; 3.30V (Balancing)</div>
+              <div class="legend-row"><div class="legend-color" style="background: #4488aa"></div> &ge; 3.20V (Nominal)</div>
+              <div class="legend-row"><div class="legend-color" style="background: #ffcc00"></div> &ge; 2.50V (Undervoltage)</div>
+              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &lt; 2.50V (Critical)</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="card-body" style="display:flex;flex-direction:column">
         <div class="cell-summary">
@@ -1047,7 +1120,19 @@
     <div class="card right">
       <div class="card-hdr">
         <span class="card-title">BMS Temps</span>
-        <button class="chart-btn" id="open-temp-chart" onclick="openTempChart()">📈 Chart</button>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="info-wrap">
+            <span class="info-icon">ℹ️</span>
+            <div class="legend-tooltip">
+              <div class="legend-row"><div class="legend-color" style="background: #29b6f6"></div> &lt; 0&deg;C</div>
+              <div class="legend-row"><div class="legend-color" style="background: #4dd0e1"></div> 0&deg;C - 14&deg;C</div>
+              <div class="legend-row"><div class="legend-color" style="background: #00ff88"></div> 15&deg;C - 35&deg;C</div>
+              <div class="legend-row"><div class="legend-color" style="background: #ffcc00"></div> 36&deg;C - 45&deg;C</div>
+              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &gt; 45&deg;C</div>
+            </div>
+          </div>
+          <button class="chart-btn" id="open-temp-chart" onclick="openTempChart()">📈 Chart</button>
+        </div>
       </div>
       <div class="card-body">
         <div class="temp-list" id="temp-list">
@@ -1470,20 +1555,15 @@
     const THRESH = { cell_ov: 3750, cell_full: 3650, cell_bal: 3300, cell_nom: 3200, cell_uv: 2500 };
 
     function cellColor(mv) {
-      if (mv >= THRESH.cell_ov) return 'var(--red)';
-      if (mv >= THRESH.cell_full) return 'var(--accent)';
-      if (mv >= THRESH.cell_bal) return 'var(--green)';
-      if (mv >= THRESH.cell_nom) return 'var(--text)';
-      if (mv >= THRESH.cell_uv) return 'var(--yellow)';
-      return 'var(--red)';
-    }
-    function cellBarColor(mv) {
       if (mv >= THRESH.cell_ov) return '#ff2244';
       if (mv >= THRESH.cell_full) return '#00d4ff';
       if (mv >= THRESH.cell_bal) return '#00ff88';
       if (mv >= THRESH.cell_nom) return '#4488aa';
       if (mv >= THRESH.cell_uv) return '#ffcc00';
       return '#ff2244';
+    }
+    function cellBarColor(mv) {
+      return cellColor(mv);
     }
     function cellBarPct(mv) {
       return Math.max(4, Math.min(100, ((mv - 2400) / (3700 - 2400)) * 100));
@@ -1494,9 +1574,9 @@
     function tempColor(t) {
       if (t < 0) return '#29b6f6';
       if (t < 15) return '#4dd0e1';
-      if (t <= 35) return 'var(--green)';
-      if (t <= 45) return 'var(--yellow)';
-      return 'var(--red)';
+      if (t <= 35) return '#00ff88';
+      if (t <= 45) return '#ffcc00';
+      return '#ff2244';
     }
     function hsTempColor(t) {
       if (t < 40) return 'var(--green)';
