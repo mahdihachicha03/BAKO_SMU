@@ -783,7 +783,7 @@
       pointer-events: none;
       transition: opacity 0.2s, transform 0.2s;
       z-index: 50;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
     }
 
     .info-wrap:hover .legend-tooltip {
@@ -1088,12 +1088,24 @@
           <div class="info-wrap">
             <span class="info-icon">ℹ️</span>
             <div class="legend-tooltip">
-              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &ge; 3.75V (Overvoltage)</div>
-              <div class="legend-row"><div class="legend-color" style="background: #00d4ff"></div> &ge; 3.65V (Full)</div>
-              <div class="legend-row"><div class="legend-color" style="background: #00ff88"></div> &ge; 3.30V (Balancing)</div>
-              <div class="legend-row"><div class="legend-color" style="background: #4488aa"></div> &ge; 3.20V (Nominal)</div>
-              <div class="legend-row"><div class="legend-color" style="background: #ffcc00"></div> &ge; 2.50V (Undervoltage)</div>
-              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &lt; 2.50V (Critical)</div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #ff2244"></div> &ge; 3.75V (Overvoltage)
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #00d4ff"></div> &ge; 3.65V (Full)
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #00ff88"></div> &ge; 3.30V (Balancing)
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #4488aa"></div> &ge; 3.20V (Nominal)
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #ffcc00"></div> &ge; 2.50V (Undervoltage)
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #ff2244"></div> &lt; 2.50V (Critical)
+              </div>
             </div>
           </div>
         </div>
@@ -1124,11 +1136,21 @@
           <div class="info-wrap">
             <span class="info-icon">ℹ️</span>
             <div class="legend-tooltip">
-              <div class="legend-row"><div class="legend-color" style="background: #29b6f6"></div> &lt; 0&deg;C</div>
-              <div class="legend-row"><div class="legend-color" style="background: #4dd0e1"></div> 0&deg;C - 14&deg;C</div>
-              <div class="legend-row"><div class="legend-color" style="background: #00ff88"></div> 15&deg;C - 35&deg;C</div>
-              <div class="legend-row"><div class="legend-color" style="background: #ffcc00"></div> 36&deg;C - 45&deg;C</div>
-              <div class="legend-row"><div class="legend-color" style="background: #ff2244"></div> &gt; 45&deg;C</div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #29b6f6"></div> &lt; 0&deg;C
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #4dd0e1"></div> 0&deg;C - 14&deg;C
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #00ff88"></div> 15&deg;C - 35&deg;C
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #ffcc00"></div> 36&deg;C - 45&deg;C
+              </div>
+              <div class="legend-row">
+                <div class="legend-color" style="background: #ff2244"></div> &gt; 45&deg;C
+              </div>
             </div>
           </div>
           <button class="chart-btn" id="open-temp-chart" onclick="openTempChart()">📈 Chart</button>
